@@ -11,7 +11,8 @@ namespace ObjSharp
         public List<Vertex> VertexList { get; }
         public List<VertexColor> VertexColorList { get; }
 
-        public List<string> MtlList { get; }
+        public List<Mtl> MtlList { get; }
+        public List<string> MtlFileList { get; }
 
         public List<Face> FaceList { get; }
 
@@ -29,7 +30,8 @@ namespace ObjSharp
             UvList = new List<Uv>(capacity);
             VertexColorList = new List<VertexColor>(capacity);
 
-            MtlList = new List<string>();
+            MtlList = new List<Mtl>();
+            MtlFileList = new List<string>();
         }
 
         public Obj() : this(4096) { }

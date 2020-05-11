@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using ObjSharp.Extensions;
-using ObjSharp.Types;
 using UnityEngine;
 
 namespace ObjSharp
@@ -13,57 +10,80 @@ namespace ObjSharp
 
     public class ObjProvider : MonoBehaviour
     {
-        public GameObject TextureTemplate;
-        public GameObject VertexColorTemplate;
+        public Material TextureMaterial;
+        public Material VertexColorMaterial;
+        public GameObject Templete;
 
-        public GameObject Load(string path)
+        public Material MakeMaterial(Obj obj)
         {
-            var lines = File.ReadAllLines(path);
-            var obj = ObjLoader.LoadObj(lines);
-            var mesh = ConvertMesh(obj);
-
             if (obj.ColorType == ColorType.VertexColor)
             {
-                var template = Instantiate(VertexColorTemplate);
-                var meshFilter = template.GetComponent<MeshFilter>();
-
-                meshFilter.mesh = mesh;
-
-                return template;
+                return new Material(VertexColorMaterial);
             }
-            else
-            {
-                var template = Instantiate(TextureTemplate);
-                var meshFilter = template.GetComponent<MeshFilter>();
 
-                meshFilter.mesh = mesh;
-                return template;
-            }
+            return new Material(TextureMaterial);
         }
 
-
-        public GameObject Load(string[] data)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelFileName"></param>
+        /// <param name="dir">for load texture</param>
+        /// <returns></returns>
+        public GameObject Load(string modelFileName, string dir)
         {
-            var obj = ObjLoader.LoadObj(data);
+            var modelPath = Path.Combine(dir, modelFileName);
+            var lines = File.ReadAllLines(modelPath);
+            var obj = ObjLoader.LoadObjWithMaterial(lines, dir);
             var mesh = ConvertMesh(obj);
 
-            if (obj.ColorType == ColorType.VertexColor)
+            var gameObjInstance = Instantiate(Templete);
+            var render = gameObjInstance.GetComponent<Renderer>();
+            render.material = MakeMaterial(obj);
+
+            if (obj.ColorType == ColorType.TextureColor)
             {
-                var template = Instantiate(VertexColorTemplate);
-                var meshFilter = template.GetComponent<MeshFilter>();
+                byte[] pngBytes = File.ReadAllBytes(Path.Combine(dir, obj.MtlList.First().TextureName));
+                Texture2D tex = new Texture2D(1, 1);
+                tex.LoadImage(pngBytes);
 
-                meshFilter.mesh = mesh;
-
-                return template;
+                render.material.mainTexture = tex;
             }
-            else
+
+            var meshFilter = gameObjInstance.GetComponent<MeshFilter>();
+            meshFilter.mesh = mesh;
+
+            return gameObjInstance;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="dir">for load texture</param>
+        /// <returns></returns>
+        public GameObject Load(string[] data, string dir)
+        {
+            var obj = ObjLoader.LoadObjWithMaterial(data, dir);
+            var mesh = ConvertMesh(obj);
+
+            var gameObjInstance = Instantiate(Templete);
+            var render = gameObjInstance.GetComponent<Renderer>();
+            render.material = MakeMaterial(obj);
+
+            if (obj.ColorType == ColorType.TextureColor)
             {
-                var template = Instantiate(TextureTemplate);
-                var meshFilter = template.GetComponent<MeshFilter>();
+                byte[] pngBytes = File.ReadAllBytes(Path.Combine(dir, obj.MtlList.First().TextureName));
+                Texture2D tex = new Texture2D(1, 1);
+                tex.LoadImage(pngBytes);
 
-                meshFilter.mesh = mesh;
-                return template;
+                render.material.mainTexture = tex;
             }
+
+            var meshFilter = gameObjInstance.GetComponent<MeshFilter>();
+            meshFilter.mesh = mesh;
+
+            return gameObjInstance;
         }
 
         /// <summary>

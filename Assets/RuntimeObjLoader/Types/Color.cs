@@ -2,26 +2,24 @@
 
 namespace ObjSharp.Types
 {
-    public class Vertex
+    public class Color
     {
-        public int Index { get; set; }
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
+        public float R { get; set; }
+        public float G { get; set; }
+        public float B { get; set; }
 
-        public Vertex()
+        public Color()
         {
-
         }
 
-        public Vertex(float x, float y, float z)
+        public Color(float r, float g, float b)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            R = r;
+            G = g;
+            B = b;
         }
 
-        public static Vertex LoadFromStringArray(string[] data)
+        public static Color LoadFromStringArray(string[] data)
         {
             var success = float.TryParse(data[1], out var x);
             if (!success) throw new ArgumentException("Could not parse x parameter as double");
@@ -32,12 +30,7 @@ namespace ObjSharp.Types
             success = float.TryParse(data[3], out var z);
             if (!success) throw new ArgumentException("Could not parse z parameter as double");
 
-            return new Vertex(x, y, z);
-        }
-
-        public override string ToString()
-        {
-            return $"vt {X} {Y}";
+            return new Color(x, y, z);
         }
     }
 }
